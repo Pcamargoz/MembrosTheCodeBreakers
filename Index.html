@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Code Breakers — Facens</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#F7F9FB;
+      --card:#ffffff;
+      --accent:#0A66C2; /* LinkedIn blue accent */
+      --muted:#6B7280;
+      --radius:12px;
+      --shadow: 0 6px 18px rgba(12, 20, 28, 0.08);
+      --gap:1.25rem;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color: #0b1220;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:var(--bg);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+      padding:2rem;
+      display:flex;
+      justify-content:center;
+    }
+
+    .container{
+      width:100%;
+      max-width:1100px;
+    }
+
+    header{
+      margin-bottom:1.5rem;
+    }
+
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:1rem;
+      flex-wrap:wrap;
+      margin-bottom:1rem;
+    }
+
+    h1{
+      font-size:1.4rem;
+      margin:0;
+      font-weight:700;
+      letter-spacing:-0.2px;
+    }
+    p.lead{
+      margin:0.35rem 0 0;
+      color:var(--muted);
+    }
+
+    main{
+      background:transparent;
+    }
+
+    .controls{
+      display:flex;
+      gap:0.5rem;
+      align-items:center;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:0.5rem;
+      background:var(--accent);
+      color:#fff;
+      border:none;
+      padding:0.55rem 0.9rem;
+      border-radius:10px;
+      font-weight:600;
+      text-decoration:none;
+      cursor:pointer;
+      box-shadow: 0 6px 18px rgba(10,102,194,0.12);
+      transition:transform 200ms ease, box-shadow 200ms ease, opacity 150ms;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn.secondary{
+      background:transparent;
+      color:var(--accent);
+      border:1px solid rgba(10,102,194,0.12);
+      box-shadow:none;
+    }
+
+    section{
+      margin-top:1.1rem;
+    }
+
+    .grid{
+      display:grid;
+      gap:var(--gap);
+      grid-template-columns: 1fr;
+    }
+
+    /* Responsive columns: 2 for tablet, 3 for wide desktop */
+    @media (min-width:640px){
+      .grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (min-width:1000px){
+      .grid{grid-template-columns:repeat(3,1fr)}
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:1rem;
+      box-shadow:var(--shadow);
+      display:flex;
+      gap:0.85rem;
+      align-items:flex-start;
+      transition:transform 240ms cubic-bezier(.2,.9,.2,1), box-shadow 240ms;
+      transform: translateY(14px);
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+
+    /* visible state added by JS when in viewport */
+    .card.show{
+      transform:none;
+      opacity:1;
+      transition: transform 480ms cubic-bezier(.2,.9,.2,1), opacity 480ms;
+    }
+
+    .card:hover{
+      transform: translateY(-6px);
+      box-shadow: 0 16px 36px rgba(12,20,28,0.12);
+    }
+
+    figure{
+      margin:0;
+      width:72px;
+      min-width:72px;
+      height:72px;
+      border-radius:10px;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(180deg, #eef5ff, #ffffff);
+      border:1px solid rgba(12,20,28,0.03);
+    }
+    figure img{
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .meta{
+      flex:1;
+      min-width:0;
+    }
+
+    .name-row{
+      display:flex;
+      align-items:center;
+      gap:0.5rem;
+      justify-content:space-between;
+    }
+
+    .name{
+      font-weight:600;
+      font-size:0.98rem;
+      margin:0;
+      color: #071022;
+    }
+
+    .role{
+      margin-top:0.25rem;
+      font-size:0.85rem;
+      color:var(--muted);
+      min-height:1.05em; /* keep cards consistent if empty */
+    }
+
+    .links{
+      display:flex;
+      align-items:center;
+      gap:0.5rem;
+      margin-left:0.25rem;
+    }
+
+    .linkedin-link{
+      display:inline-flex;
+      align-items:center;
+      gap:0.45rem;
+      color:var(--accent);
+      text-decoration:none;
+      font-weight:600;
+      font-size:0.88rem;
+      padding:0.12rem 0.15rem;
+      border-radius:6px;
+      transition:all 180ms ease;
+    }
+
+    .linkedin-link:hover{
+      text-decoration:none;
+      transform:translateY(-3px);
+      filter:brightness(1.02);
+    }
+
+    .linkedin-icon{
+      width:18px;height:18px;display:inline-block;flex:0 0 18px;
+    }
+
+    /* subtle underline animation on name when hover on the card's link area */
+    .linkedin-link .text{
+      position:relative;
+    }
+    .linkedin-link .text::after{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:-4px;
+      height:2px;
+      background:var(--accent);
+      transform:scaleX(0);
+      transform-origin:left center;
+      transition:transform 220ms cubic-bezier(.2,.9,.2,1);
+      border-radius:2px;
+      opacity:0.95;
+    }
+    .linkedin-link:hover .text::after{transform:scaleX(1)}
+
+    /* Footer / contact */
+    footer{
+      margin-top:1.5rem;
+      padding:1rem;
+      border-radius:10px;
+      background:linear-gradient(180deg,#ffffff,#fbfdff);
+      box-shadow:var(--shadow);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:1rem;
+      flex-wrap:wrap;
+    }
+    footer .contact{
+      color:var(--muted);
+      font-size:0.95rem;
+    }
+
+    /* Accessibility focus states */
+    a:focus, button:focus{
+      outline:3px solid rgba(10,102,194,0.18);
+      outline-offset:3px;
+      border-radius:6px;
+    }
+
+    /* small helpers */
+    .sr-only{
+      position:absolute!important;
+      height:1px;width:1px;
+      overflow:hidden;
+      clip:rect(1px,1px,1px,1px);
+      white-space:nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <header>
+      <div class="top">
+        <div>
+          <h1>The Code Breakers — Facens</h1>
+          <p class="lead">Somos integrantes do grupo The Code Breakers da Facens.</p>
+        </div>
+        <div class="controls" aria-hidden="false">
+          <a class="btn" id="downloadList" href="assets/membros.pdf" download="membros-the-code-breakers.pdf">
+            <!-- Icon: download (simple) -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 11l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M21 21H3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Baixar lista (PDF)
+          </a>
+          <a class="btn secondary" href="#contato">Contato</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section aria-labelledby="team-heading">
+        <h2 id="team-heading" style="margin:0 0 0.75rem 0;font-size:1.05rem">Nosso Time</h2>
+
+        <div class="grid" id="teamGrid">
+          <!-- MEMBER 1: Pedro Cesar Camargo dos Santos -->
+          <article class="card" tabindex="0" aria-labelledby="name-pedro">
+            <figure>
+              <!-- Substituir por: assets/pedro.jpg ou .png -->
+              <!-- Coloque a foto aqui: assets/pedro.svg -->
+              <img src="assets/pedro.svg" alt="Foto de Pedro Cesar Camargo dos Santos — The Code Breakers">
+            </figure>
+            <div class="meta">
+              <div class="name-row">
+                <div>
+                  <p id="name-pedro" class="name">Pedro Cesar Camargo dos Santos</p>
+                </div>
+                <div class="links">
+                  <!-- LINK DO LINKEDIN: COLE_AQUI_O_LINKEDIN_DO_PEDRO -->
+                  <a class="linkedin-link" href="COLE_AQUI_O_LINKEDIN_DO_PEDRO" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Pedro Cesar Camargo dos Santos">
+                    <span class="linkedin-icon" aria-hidden="true">
+                      <!-- LinkedIn icon (SVG) -->
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="2" width="20" height="20" rx="3" fill="#0A66C2"/>
+                        <path d="M6.5 9.5H9V18H6.5zM7.75 6.75a1.375 1.375 0 110 2.75 1.375 1.375 0 010-2.75zM10.75 9.5h2.25v1.15c.3-.55 1.08-1.15 2.36-1.15 2.52 0 3 1.66 3 3.82V18H16.5v-4.1c0-.99-.02-2.27-1.38-2.27-1.38 0-1.59 1.08-1.59 2.2V18H10.75z" fill="#fff"/>
+                      </svg>
+                    </span>
+                    <span class="text">LinkedIn</span>
+                  </a>
+                </div>
+              </div>
+              <p class="role" aria-hidden="false"><!-- cargo/descrição (opcional) --></p>
+            </div>
+          </article>
+
+          <!-- MEMBER 2: Leonardo Barros -->
+          <article class="card" tabindex="0" aria-labelledby="name-leonardo">
+            <figure>
+              <!-- Coloque a foto aqui: assets/leonardo.svg -->
+              <img src="assets/leonardo.svg" alt="Foto de Leonardo Barros — The Code Breakers">
+            </figure>
+            <div class="meta">
+              <div class="name-row">
+                <p id="name-leonardo" class="name">Leonardo Barros</p>
+                <div class="links">
+                  <!-- LINK DO LINKEDIN: COLE_AQUI_O_LINKEDIN_DO_LEONARDO -->
+                  <a class="linkedin-link" href="COLE_AQUI_O_LINKEDIN_DO_LEONARDO" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Leonardo Barros">
+                    <span class="linkedin-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="2" width="20" height="20" rx="3" fill="#0A66C2"/>
+                        <path d="M6.5 9.5H9V18H6.5zM7.75 6.75a1.375 1.375 0 110 2.75 1.375 1.375 0 010-2.75zM10.75 9.5h2.25v1.15c.3-.55 1.08-1.15 2.36-1.15 2.52 0 3 1.66 3 3.82V18H16.5v-4.1c0-.99-.02-2.27-1.38-2.27-1.38 0-1.59 1.08-1.59 2.2V18H10.75z" fill="#fff"/>
+                      </svg>
+                    </span>
+                    <span class="text">LinkedIn</span>
+                  </a>
+                </div>
+              </div>
+              <p class="role"></p>
+            </div>
+          </article>
+
+          <!-- MEMBER 3: Luana Moreira de Arruda -->
+          <article class="card" tabindex="0" aria-labelledby="name-luana">
+            <figure>
+              <!-- Coloque a foto aqui: assets/luana.svg -->
+              <img src="assets/luana.svg" alt="Foto de Luana Moreira de Arruda — The Code Breakers">
+            </figure>
+            <div class="meta">
+              <div class="name-row">
+                <p id="name-luana" class="name">Luana Moreira de Arruda</p>
+                <div class="links">
+                  <!-- LINK DO LINKEDIN: COLE_AQUI_O_LINKEDIN_DA_LUANA -->
+                  <a class="linkedin-link" href="COLE_AQUI_O_LINKEDIN_DA_LUANA" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Luana Moreira de Arruda">
+                    <span class="linkedin-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="2" width="20" height="20" rx="3" fill="#0A66C2"/>
+                        <path d="M6.5 9.5H9V18H6.5zM7.75 6.75a1.375 1.375 0 110 2.75 1.375 1.375 0 010-2.75zM10.75 9.5h2.25v1.15c.3-.55 1.08-1.15 2.36-1.15 2.52 0 3 1.66 3 3.82V18H16.5v-4.1c0-.99-.02-2.27-1.38-2.27-1.38 0-1.59 1.08-1.59 2.2V18H10.75z" fill="#fff"/>
+                      </svg>
+                    </span>
+                    <span class="text">LinkedIn</span>
+                  </a>
+                </div>
+              </div>
+              <p class="role"></p>
+            </div>
+          </article>
+
+          <!-- MEMBER 4: Yasmin Kamilly Da Silva Antunes -->
+          <article class="card" tabindex="0" aria-labelledby="name-yasmin">
+            <figure>
+              <!-- Coloque a foto aqui: assets/yasmin.svg -->
+              <img src="assets/yasmin.svg" alt="Foto de Yasmin Kamilly Da Silva Antunes — The Code Breakers">
+            </figure>
+            <div class="meta">
+              <div class="name-row">
+                <p id="name-yasmin" class="name">Yasmin Kamilly Da Silva Antunes</p>
+                <div class="links">
+                  <!-- LINK DO LINKEDIN: COLE_AQUI_O_LINKEDIN_DA_YASMIN -->
+                  <a class="linkedin-link" href="COLE_AQUI_O_LINKEDIN_DA_YASMIN" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Yasmin Kamilly Da Silva Antunes">
+                    <span class="linkedin-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="2" width="20" height="20" rx="3" fill="#0A66C2"/>
+                        <path d="M6.5 9.5H9V18H6.5zM7.75 6.75a1.375 1.375 0 110 2.75 1.375 1.375 0 010-2.75zM10.75 9.5h2.25v1.15c.3-.55 1.08-1.15 2.36-1.15 2.52 0 3 1.66 3 3.82V18H16.5v-4.1c0-.99-.02-2.27-1.38-2.27-1.38 0-1.59 1.08-1.59 2.2V18H10.75z" fill="#fff"/>
+                      </svg>
+                    </span>
+                    <span class="text">LinkedIn</span>
+                  </a>
+                </div>
+              </div>
+              <p class="role"></p>
+            </div>
+          </article>
+
+          <!-- MEMBER 5: Eduardo Sobral Leite -->
+          <article class="card" tabindex="0" aria-labelledby="name-eduardo">
+            <figure>
+              <!-- Coloque a foto aqui: assets/eduardo.svg -->
+              <img src="assets/eduardo.svg" alt="Foto de Eduardo Sobral Leite — The Code Breakers">
+            </figure>
+            <div class="meta">
+              <div class="name-row">
+                <p id="name-eduardo" class="name">Eduardo Sobral Leite</p>
+                <div class="links">
+                  <!-- LINK DO LINKEDIN: COLE_AQUI_O_LINKEDIN_DO_EDUARDO -->
+                  <a class="linkedin-link" href="COLE_AQUI_O_LINKEDIN_DO_EDUARDO" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Eduardo Sobral Leite">
+                    <span class="linkedin-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="2" width="20" height="20" rx="3" fill="#0A66C2"/>
+                        <path d="M6.5 9.5H9V18H6.5zM7.75 6.75a1.375 1.375 0 110 2.75 1.375 1.375 0 010-2.75zM10.75 9.5h2.25v1.15c.3-.55 1.08-1.15 2.36-1.15 2.52 0 3 1.66 3 3.82V18H16.5v-4.1c0-.99-.02-2.27-1.38-2.27-1.38 0-1.59 1.08-1.59 2.2V18H10.75z" fill="#fff"/>
+                      </svg>
+                    </span>
+                    <span class="text">LinkedIn</span>
+                  </a>
+                </div>
+              </div>
+              <p class="role"></p>
+            </div>
+          </article>
+
+          <!-- MEMBER 6: Pedro Paulo Salvetti -->
+          <article class="card" tabindex="0" aria-labelledby="name-pedro-paulo">
+            <figure>
+              <!-- Coloque a foto aqui: assets/pedro_paulo.svg -->
+              <img src="assets/pedro_paulo.svg" alt="Foto de Pedro Paulo Salvetti — The Code Breakers">
+            </figure>
+            <div class="meta">
+              <div class="name-row">
+                <p id="name-pedro-paulo" class="name">Pedro Paulo Salvetti</p>
+                <div class="links">
+                  <!-- LINK DO LINKEDIN: COLE_AQUI_O_LINKEDIN_DO_PEDRO_PAULO -->
+                  <a class="linkedin-link" href="COLE_AQUI_O_LINKEDIN_DO_PEDRO_PAULO" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Pedro Paulo Salvetti">
+                    <span class="linkedin-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="2" width="20" height="20" rx="3" fill="#0A66C2"/>
+                        <path d="M6.5 9.5H9V18H6.5zM7.75 6.75a1.375 1.375 0 110 2.75 1.375 1.375 0 010-2.75zM10.75 9.5h2.25v1.15c.3-.55 1.08-1.15 2.36-1.15 2.52 0 3 1.66 3 3.82V18H16.5v-4.1c0-.99-.02-2.27-1.38-2.27-1.38 0-1.59 1.08-1.59 2.2V18H10.75z" fill="#fff"/>
+                      </svg>
+                    </span>
+                    <span class="text">LinkedIn</span>
+                  </a>
+                </div>
+              </div>
+              <p class="role"></p>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <footer id="contato" aria-labelledby="contato-heading">
+        <div>
+          <h3 id="contato-heading" style="margin:0 0 0.25rem 0;font-size:0.98rem">Contato</h3>
+          <p class="contact">E-mail: <a href="mailto:contato@thecodebreakers.facens">contato@thecodebreakers.facens</a></p>
+        </div>
+        <div style="color:var(--muted);font-size:0.9rem">Facens — The Code Breakers</div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Intersection Observer to reveal cards with fade-up animation
+    (function(){
+      const cards = document.querySelectorAll('.card');
+      const io = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting){
+            entry.target.classList.add('show');
+            observer.unobserve(entry.target); // reveal once
+          }
+        });
+      }, {threshold:0.12});
+      cards.forEach(c => io.observe(c));
+    })();
+
+    // Accessibility: allow Enter key to follow LinkedIn link when focused on card
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter'){
+          const link = card.querySelector('.linkedin-link');
+          if(link) link.click();
+        }
+      });
+    });
+
+    // NOTE: The download link points to assets/membros.pdf (placeholder).
+    // If you want to generate the list dynamically instead of a static file, uncomment the code below.
+    /*
+    document.getElementById('downloadList').addEventListener('click', function(e){
+      e.preventDefault();
+      const members = [
+        "Pedro Cesar Camargo dos Santos - COLE_AQUI_O_LINKEDIN_DO_PEDRO",
+        "Leonardo Barros - COLE_AQUI_O_LINKEDIN_DO_LEONARDO",
+        "Luana Moreira de Arruda - COLE_AQUI_O_LINKEDIN_DA_LUANA",
+        "Yasmin Kamilly Da Silva Antunes - COLE_AQUI_O_LINKEDIN_DA_YASMIN",
+        "Eduardo Sobral Leite - COLE_AQUI_O_LINKEDIN_DO_EDUARDO",
+        "Pedro Paulo Salvetti - COLE_AQUI_O_LINKEDIN_DO_PEDRO_PAULO"
+      ];
+      const txt = "Lista de integrantes - The Code Breakers\\n\\n" + members.join("\\n");
+      const blob = new Blob([txt], {type:'application/pdf'}); // placeholder PDF mime - for a real PDF use a proper generator
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'membros-the-code-breakers.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+    */
+  </script>
+</body>
+</html>
